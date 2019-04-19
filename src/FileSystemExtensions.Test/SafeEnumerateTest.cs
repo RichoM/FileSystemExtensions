@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,6 +9,11 @@ namespace FileSystemExtensions.Test
     [TestClass]
     public class SafeEnumerateTest
     {
+        private IEnumerable<DirectoryInfo> GetDirectories(params string[] names)
+        {
+            return names.Select(each => new DirectoryInfo(each));
+        }
+
         [TestMethod]
         public void Test001_OneLevelFolderSingleFile()
         {
@@ -91,6 +97,81 @@ namespace FileSystemExtensions.Test
             var dir = new DirectoryInfo(@"Resources\D");
             var expected = new string[] { "6.txt" };
             var actual = dir.SafeEnumerateFiles("*.txt", SearchOption.TopDirectoryOnly)
+                .Select(f => f.Name)
+                .ToArray();
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void Test009_ExclusionsEmpty()
+        {
+            var dir = new DirectoryInfo(@"Resources\D");
+            var expected = new string[] { "6.txt", "7.bmp", "8.csv", "9.txt", "10.xls", "11.gif" };
+            var actual = dir
+                .SafeEnumerateFiles(
+                    searchPattern: "*", 
+                    searchOption: SearchOption.AllDirectories,
+                    exclusions: new DirectoryInfo[0])
+                .Select(f => f.Name)
+                .ToArray();
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void Test010_ExclusionsSingleElement()
+        {
+            var dir = new DirectoryInfo(@"Resources\D");
+            var expected = new string[] { "6.txt", "8.csv", "9.txt", "10.xls", "11.gif" };
+            var actual = dir
+                .SafeEnumerateFiles(
+                    searchPattern: "*",
+                    searchOption: SearchOption.AllDirectories,
+                    exclusions: GetDirectories(@"Resources\D\DA"))
+                .Select(f => f.Name)
+                .ToArray();
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void Test011_ExclusionsMultipleElements()
+        {
+            var dir = new DirectoryInfo(@"Resources\D");
+            var expected = new string[] { "6.txt", "10.xls", "11.gif" };
+            var actual = dir
+                .SafeEnumerateFiles(
+                    searchPattern: "*",
+                    searchOption: SearchOption.AllDirectories,
+                    exclusions: GetDirectories(@"Resources\D\DA", @"Resources\D\DB"))
+                .Select(f => f.Name)
+                .ToArray();
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void Test012_ExclusionsDeep1()
+        {
+            var dir = new DirectoryInfo(@"Resources\D");
+            var expected = new string[] { "6.txt", "7.bmp", "8.csv", "9.txt" };
+            var actual = dir
+                .SafeEnumerateFiles(
+                    searchPattern: "*",
+                    searchOption: SearchOption.AllDirectories,
+                    exclusions: GetDirectories(@"Resources\D\DC"))
+                .Select(f => f.Name)
+                .ToArray();
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void Test013_ExclusionsDeep2()
+        {
+            var dir = new DirectoryInfo(@"Resources\D");
+            var expected = new string[] { "6.txt", "7.bmp", "8.csv", "9.txt", "10.xls" };
+            var actual = dir
+                .SafeEnumerateFiles(
+                    searchPattern: "*",
+                    searchOption: SearchOption.AllDirectories,
+                    exclusions: GetDirectories(@"Resources\D\DC\DCA"))
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);

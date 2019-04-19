@@ -143,9 +143,9 @@ namespace FileSystemExtensions
         /// continue with the next directory.
         /// 
         /// The process is completely iterative. But beware, it can take a very long time to traverse
-        /// a big directory (specially if it contains many subdirectories). The current implementation
-        /// doesn't allow you to specify which directories to include/exclude from the search so if
-        /// you ask it to enumerate all the files in C:\ it will do exactly that. You have been warned!
+        /// a big directory (specially if it contains many subdirectories). This override doesn't allow 
+        /// you to specify which directories to include/exclude from the search so if you ask it to 
+        /// enumerate all the files in C:\ it will do exactly that. You have been warned!
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="searchPattern"></param>
@@ -156,25 +156,51 @@ namespace FileSystemExtensions
             string searchPattern = "*",
             SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
+            return SafeEnumerateFiles(dir, new DirectoryInfo[0], searchPattern, searchOption);
+        }
+
+        /// <summary>
+        /// This method is similar to the base DirectoryInfo.EnumerateFiles(..) but the difference
+        /// is that it will hide any exception occurred while traversing the file system and simply
+        /// continue with the next directory.
+        /// 
+        /// The process is completely iterative. But beware, it can take a very long time to traverse
+        /// a big directory (specially if it contains many subdirectories).
+        /// </summary>
+        /// <param name="dir"></param>
+        /// <param name="exclusions"></param>
+        /// <param name="searchPattern"></param>
+        /// <param name="searchOption"></param>
+        /// <returns></returns>
+        public static IEnumerable<FileInfo> SafeEnumerateFiles(
+            this DirectoryInfo dir,
+            IEnumerable<DirectoryInfo> exclusions,
+            string searchPattern = "*",
+            SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        {
             DirectoryInfo current = dir;
             while (current != null)
             {
-                IEnumerable<FileInfo> files = null;
-                try
+                var excluded = exclusions.Any(exc => exc.PathEqual(current) || exc.Contains(current));
+                if (!excluded)
                 {
-                    files = current.EnumerateFiles(searchPattern, SearchOption.TopDirectoryOnly)
-                        .Where((file) => file.FullNameOrNull() != null);
-                }
-                catch (Exception)
-                {
-                    // Do nothing
-                }
-
-                if (files != null)
-                {
-                    foreach (FileInfo file in files)
+                    IEnumerable<FileInfo> files = null;
+                    try
                     {
-                        yield return file;
+                        files = current.EnumerateFiles(searchPattern, SearchOption.TopDirectoryOnly)
+                            .Where((file) => file.FullNameOrNull() != null);
+                    }
+                    catch (Exception)
+                    {
+                        // Do nothing
+                    }
+
+                    if (files != null)
+                    {
+                        foreach (FileInfo file in files)
+                        {
+                            yield return file;
+                        }
                     }
                 }
 
@@ -186,19 +212,23 @@ namespace FileSystemExtensions
                 {
                     DirectoryInfo next = null;
 
-                    // First try with the first subdirectory
-                    try
+                    // If the current dir is excluded we shouldn't go inside
+                    if (!excluded)
                     {
-                        next = current.EnumerateDirectories("*", SearchOption.TopDirectoryOnly)
-                            .FirstOrDefault((each) => each.FullNameOrNull() != null);
+                        // Try with the first subdirectory
+                        try
+                        {
+                            next = current.EnumerateDirectories("*", SearchOption.TopDirectoryOnly)
+                                .FirstOrDefault((each) => each.FullNameOrNull() != null);
+                        }
+                        catch (Exception) { /* Do nothing */ }
                     }
-                    catch (Exception) { /* Do nothing */ }
 
                     if (next == null)
                     {
                         /*
-                        If the current directory doesn't have any subdirectories, we should try
-                        with the next sibling.
+                        If the current directory is excluded or it doesn't have any subdirectories, 
+                        we should try with the next sibling.
                         If the next sibling is null, it means we are the last sibling, so we should
                         walk up the hierarchy until we find our parent's next sibling.
                         */

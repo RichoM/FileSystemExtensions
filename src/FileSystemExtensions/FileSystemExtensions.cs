@@ -147,16 +147,105 @@ namespace FileSystemExtensions
         /// you to specify which directories to include/exclude from the search so if you ask it to 
         /// enumerate all the files in C:\ it will do exactly that. You have been warned!
         /// </summary>
-        /// <param name="dir"></param>
-        /// <param name="searchPattern"></param>
-        /// <param name="searchOption"></param>
+        /// <returns></returns>
+        public static IEnumerable<FileInfo> SafeEnumerateFiles(this DirectoryInfo dir)
+        {
+            return SafeEnumerateFiles(dir, "*");
+        }
+
+
+        /// <summary>
+        /// This method is similar to the base DirectoryInfo.EnumerateFiles(..) but the difference
+        /// is that it will hide any exception occurred while traversing the file system and simply
+        /// continue with the next directory.
+        /// 
+        /// The process is completely iterative. But beware, it can take a very long time to traverse
+        /// a big directory (specially if it contains many subdirectories). This override doesn't allow 
+        /// you to specify which directories to include/exclude from the search so if you ask it to 
+        /// enumerate all the files in C:\ it will do exactly that. You have been warned!
+        /// </summary>
         /// <returns></returns>
         public static IEnumerable<FileInfo> SafeEnumerateFiles(
             this DirectoryInfo dir,
-            string searchPattern = "*",
-            SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            string searchPattern)
         {
-            return SafeEnumerateFiles(dir, new DirectoryInfo[0], searchPattern, searchOption);
+            return SafeEnumerateFiles(dir, searchPattern, SearchOption.AllDirectories);
+        }
+
+
+        /// <summary>
+        /// This method is similar to the base DirectoryInfo.EnumerateFiles(..) but the difference
+        /// is that it will hide any exception occurred while traversing the file system and simply
+        /// continue with the next directory.
+        /// 
+        /// The process is completely iterative. But beware, it can take a very long time to traverse
+        /// a big directory (specially if it contains many subdirectories). This override doesn't allow 
+        /// you to specify which directories to include/exclude from the search so if you ask it to 
+        /// enumerate all the files in C:\ it will do exactly that. You have been warned!
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<FileInfo> SafeEnumerateFiles(
+            this DirectoryInfo dir,
+            SearchOption searchOption)
+        {
+            return SafeEnumerateFiles(dir, "*", searchOption);
+        }
+
+        /// <summary>
+        /// This method is similar to the base DirectoryInfo.EnumerateFiles(..) but the difference
+        /// is that it will hide any exception occurred while traversing the file system and simply
+        /// continue with the next directory.
+        /// 
+        /// The process is completely iterative. But beware, it can take a very long time to traverse
+        /// a big directory (specially if it contains many subdirectories). This override doesn't allow 
+        /// you to specify which directories to include/exclude from the search so if you ask it to 
+        /// enumerate all the files in C:\ it will do exactly that. You have been warned!
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<FileInfo> SafeEnumerateFiles(
+            this DirectoryInfo dir,
+            string searchPattern,
+            SearchOption searchOption)
+        {
+            return SafeEnumerateFiles(dir, searchPattern, searchOption, new DirectoryInfo[0]);
+        }
+
+        /// <summary>
+        /// This method is similar to the base DirectoryInfo.EnumerateFiles(..) but the difference
+        /// is that it will hide any exception occurred while traversing the file system and simply
+        /// continue with the next directory.
+        /// 
+        /// The process is completely iterative. But beware, it can take a very long time to traverse
+        /// a big directory (specially if it contains many subdirectories). This override doesn't allow 
+        /// you to specify which directories to include/exclude from the search so if you ask it to 
+        /// enumerate all the files in C:\ it will do exactly that. You have been warned!
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<FileInfo> SafeEnumerateFiles(
+            this DirectoryInfo dir,
+            string searchPattern,
+            IEnumerable<DirectoryInfo> exclusions)
+        {
+            return SafeEnumerateFiles(dir, searchPattern, SearchOption.AllDirectories, exclusions);
+        }
+
+
+        /// <summary>
+        /// This method is similar to the base DirectoryInfo.EnumerateFiles(..) but the difference
+        /// is that it will hide any exception occurred while traversing the file system and simply
+        /// continue with the next directory.
+        /// 
+        /// The process is completely iterative. But beware, it can take a very long time to traverse
+        /// a big directory (specially if it contains many subdirectories). This override doesn't allow 
+        /// you to specify which directories to include/exclude from the search so if you ask it to 
+        /// enumerate all the files in C:\ it will do exactly that. You have been warned!
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<FileInfo> SafeEnumerateFiles(
+            this DirectoryInfo dir,
+            IEnumerable<DirectoryInfo> exclusions)
+        {
+            return SafeEnumerateFiles(dir, "*", SearchOption.AllDirectories, exclusions);
         }
 
         /// <summary>
@@ -167,16 +256,12 @@ namespace FileSystemExtensions
         /// The process is completely iterative. But beware, it can take a very long time to traverse
         /// a big directory (specially if it contains many subdirectories).
         /// </summary>
-        /// <param name="dir"></param>
-        /// <param name="exclusions"></param>
-        /// <param name="searchPattern"></param>
-        /// <param name="searchOption"></param>
         /// <returns></returns>
         public static IEnumerable<FileInfo> SafeEnumerateFiles(
             this DirectoryInfo dir,
-            IEnumerable<DirectoryInfo> exclusions,
-            string searchPattern = "*",
-            SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            string searchPattern,
+            SearchOption searchOption,
+            IEnumerable<DirectoryInfo> exclusions)
         {
             DirectoryInfo current = dir;
             while (current != null)

@@ -19,7 +19,7 @@ namespace FileSystemExtensions.Test
         {
             var dir = new DirectoryInfo(@"Resources\A");
             var expected = new[] { "1.txt" };
-            var actual = dir.SafeEnumerateFiles(searchOption: SearchOption.AllDirectories)
+            var actual = dir.SafeEnumerateFiles()
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);
@@ -30,7 +30,7 @@ namespace FileSystemExtensions.Test
         {
             var dir = new DirectoryInfo(@"Resources\B");
             var expected = new[] { "2.txt", "3.txt" };
-            var actual = dir.SafeEnumerateFiles(searchOption: SearchOption.AllDirectories)
+            var actual = dir.SafeEnumerateFiles()
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);
@@ -52,7 +52,7 @@ namespace FileSystemExtensions.Test
         {
             var dir = new DirectoryInfo(@"Resources\C");
             var expected = new[] { "4.txt", "5.txt", "6.txt" };
-            var actual = dir.SafeEnumerateFiles(searchOption: SearchOption.AllDirectories)
+            var actual = dir.SafeEnumerateFiles()
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);
@@ -74,7 +74,7 @@ namespace FileSystemExtensions.Test
         {
             var dir = new DirectoryInfo(@"Resources\D");
             var expected = new[] { "6.txt", "9.txt" };
-            var actual = dir.SafeEnumerateFiles("*.txt", SearchOption.AllDirectories)
+            var actual = dir.SafeEnumerateFiles("*.txt")
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);
@@ -85,7 +85,7 @@ namespace FileSystemExtensions.Test
         {
             var dir = new DirectoryInfo(@"Resources\D");
             var expected = new[] { "7.bmp" };
-            var actual = dir.SafeEnumerateFiles("*.bmp", SearchOption.AllDirectories)
+            var actual = dir.SafeEnumerateFiles("*.bmp")
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);
@@ -107,11 +107,7 @@ namespace FileSystemExtensions.Test
         {
             var dir = new DirectoryInfo(@"Resources\D");
             var expected = new string[] { "6.txt", "7.bmp", "8.csv", "9.txt", "10.xls", "11.gif" };
-            var actual = dir
-                .SafeEnumerateFiles(
-                    searchPattern: "*", 
-                    searchOption: SearchOption.AllDirectories,
-                    exclusions: new DirectoryInfo[0])
+            var actual = dir.SafeEnumerateFiles(exclusions: new DirectoryInfo[0])
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);
@@ -122,11 +118,7 @@ namespace FileSystemExtensions.Test
         {
             var dir = new DirectoryInfo(@"Resources\D");
             var expected = new string[] { "6.txt", "8.csv", "9.txt", "10.xls", "11.gif" };
-            var actual = dir
-                .SafeEnumerateFiles(
-                    searchPattern: "*",
-                    searchOption: SearchOption.AllDirectories,
-                    exclusions: GetDirectories(@"Resources\D\DA"))
+            var actual = dir.SafeEnumerateFiles(exclusions: GetDirectories(@"Resources\D\DA"))
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);
@@ -137,11 +129,7 @@ namespace FileSystemExtensions.Test
         {
             var dir = new DirectoryInfo(@"Resources\D");
             var expected = new string[] { "6.txt", "10.xls", "11.gif" };
-            var actual = dir
-                .SafeEnumerateFiles(
-                    searchPattern: "*",
-                    searchOption: SearchOption.AllDirectories,
-                    exclusions: GetDirectories(@"Resources\D\DA", @"Resources\D\DB"))
+            var actual = dir.SafeEnumerateFiles(exclusions: GetDirectories(@"Resources\D\DA", @"Resources\D\DB"))
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);
@@ -152,11 +140,7 @@ namespace FileSystemExtensions.Test
         {
             var dir = new DirectoryInfo(@"Resources\D");
             var expected = new string[] { "6.txt", "7.bmp", "8.csv", "9.txt" };
-            var actual = dir
-                .SafeEnumerateFiles(
-                    searchPattern: "*",
-                    searchOption: SearchOption.AllDirectories,
-                    exclusions: GetDirectories(@"Resources\D\DC"))
+            var actual = dir.SafeEnumerateFiles(exclusions: GetDirectories(@"Resources\D\DC"))
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);
@@ -167,11 +151,7 @@ namespace FileSystemExtensions.Test
         {
             var dir = new DirectoryInfo(@"Resources\D");
             var expected = new string[] { "6.txt", "7.bmp", "8.csv", "9.txt", "10.xls" };
-            var actual = dir
-                .SafeEnumerateFiles(
-                    searchPattern: "*",
-                    searchOption: SearchOption.AllDirectories,
-                    exclusions: GetDirectories(@"Resources\D\DC\DCA"))
+            var actual = dir.SafeEnumerateFiles(exclusions: GetDirectories(@"Resources\D\DC\DCA"))
                 .Select(f => f.Name)
                 .ToArray();
             CollectionAssert.AreEqual(expected, actual);
